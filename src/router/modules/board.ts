@@ -18,7 +18,8 @@ export default {
       meta: {
         title: $t("menus.pureBoard"),
         keepAlive: true,
-        frameSrc: "https://songlh.top/paint-board/"
+        frameSrc:
+          "https://tinysimple.github.io/vue-pure-admin-external-website/"
       }
     }
   ]
