@@ -45,6 +45,7 @@ function init() {
   });
 }
 
+let isRedirect = false;
 watch(
   () => currentRoute.fullPath,
   path => {
@@ -52,12 +53,23 @@ watch(
       currentRoute.name === "Redirect" &&
       path.includes(props.frameInfo?.fullPath)
     ) {
-      frameSrc.value = path; // redirect时，置换成任意值，待重定向后 重新赋值
+      // 不采用更改iframe的src的方式，其会导致两次src的改变，当iframe同源且注册了beforeunload事件时，会导致beforeunload事件被触发两次
+      // frameSrc.value = path; // redirect时，置换成任意值，待重定向后 重新赋值
+      isRedirect = true;
       loading.value = true;
     }
     // 重新赋值
     if (props.frameInfo?.fullPath === path) {
       frameSrc.value = props.frameInfo?.frameSrc;
+      if (isRedirect) {
+        let joinChar = new URL(props.frameInfo.frameSrc)?.search ? "&" : "?";
+        frameSrc.value =
+          props.frameInfo.frameSrc + `${joinChar}t=` + Date.now();
+        // 一旦点击“重新加载”，就会触发“加载中”，此处需隐藏加载中
+        // 因无法得知用户是点击了“确认离开页面”还是“不离开页面”，为了保证不离开情况下不显示加载中，此处统一隐藏
+        hideLoading();
+      }
+      isRedirect = false;
     }
   }
 );
